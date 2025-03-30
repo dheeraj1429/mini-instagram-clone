@@ -1,0 +1,32 @@
+services:
+  user-service:
+    build:
+      context: ./user-service
+      dockerfile: Dockerfile
+      target: development
+    volumes:
+      - ./user-service/src:/usr/src/app/src
+      - ./user-service/libs:/usr/src/app/libs
+    ports:
+      - 3001:3001
+    environment:
+      - PORT=3001
+      - HOST=0.0.0.0
+      - NODE_ENV=development
+
+  api-gateway:
+    build:
+      context: ./api-gateway
+      dockerfile: Dockerfile
+      target: development
+    volumes:
+      - ./api-gateway/src:/usr/src/app/src
+    ports:
+      - 3000:3000
+    environment:
+      - PORT=3000
+      - NODE_ENV=development
+      - USER_SERVICE_HOST=user-service
+      - USER_SERVICE_PORT=3001
+    depends_on:
+      - user-service
