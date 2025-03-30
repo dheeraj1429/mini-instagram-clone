@@ -4,9 +4,9 @@ import {
   IsString,
   IsStrongPassword,
 } from 'class-validator';
-import { CreateAccountInterface } from 'mini-instagram-user-service-package';
+import { CreateAccountRequestInterface } from 'mini-instagram-user-service-package';
 
-export class CreateAccountDto implements CreateAccountInterface {
+export class CreateAccountDto implements CreateAccountRequestInterface {
   @IsString()
   @IsNotEmpty()
   readonly name: string;

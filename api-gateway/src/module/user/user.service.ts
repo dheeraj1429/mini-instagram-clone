@@ -1,6 +1,11 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
-import { USER_EVENTS } from 'mini-instagram-user-service-package';
+import {
+  CreateAccountResponseInterface,
+  USER_EVENTS,
+} from 'mini-instagram-user-service-package';
+import { CreateAccountDto } from './dto';
+import { firstValueFrom } from 'rxjs';
 
 @Injectable()
 export class UserService {
@@ -10,7 +15,28 @@ export class UserService {
     @Inject('USER_SERVICE') private readonly userService: ClientProxy,
   ) {}
 
-  async createAccount(createAccountDto: unknown) {
-    this.userService.emit(USER_EVENTS.USER_CREATE, createAccountDto);
+  async createAccount(createAccountDto: CreateAccountDto) {
+    try {
+      const response = await firstValueFrom(
+        this.userService.send<CreateAccountResponseInterface, CreateAccountDto>(
+          USER_EVENTS.USER_CREATE,
+          createAccountDto,
+        ),
+      );
+
+      if (response.isError) {
+        return response;
+      }
+
+      const successResponse = response as Exclude<
+        CreateAccountResponseInterface,
+        { isError: true }
+      >;
+
+      console.log(successResponse);
+    } catch (error) {
+      console.error('Error in createAccount:', error);
+      throw error;
+    }
   }
 }

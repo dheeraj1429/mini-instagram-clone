@@ -4,9 +4,9 @@ import {
   IsString,
   IsStrongPassword,
 } from 'class-validator';
-import { CreateAccountInterface } from 'packages';
+import { CreateAccountRequestInterface } from 'packages';
 
-export class CreateAccountDto implements CreateAccountInterface {
+export class CreateAccountDto implements CreateAccountRequestInterface {
   @IsString()
   @IsNotEmpty()
   readonly name: string;

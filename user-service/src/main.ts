@@ -1,3 +1,4 @@
+import { BadRequestException, RpcExceptionFilter } from '@app/common';
 import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
@@ -20,6 +21,7 @@ async function bootstrap() {
   );
 
   app.useGlobalPipes(new ValidationPipe());
+  app.useGlobalFilters(new RpcExceptionFilter(), new BadRequestException());
 
   await app.listen();
   console.log(`User service listening on port ${port} host ${host}`);
