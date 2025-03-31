@@ -1,7 +1,8 @@
-import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
+import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { NestFactory } from '@nestjs/core';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
+import { AppModule } from './app.module';
 
 async function bootstrap() {
   const ctx = await NestFactory.createApplicationContext(AppModule);
@@ -17,6 +18,8 @@ async function bootstrap() {
       options: { port, host },
     },
   );
+
+  app.useGlobalPipes(new ValidationPipe());
 
   await app.listen();
   console.log(`Auth service listening on port ${port} host ${host}`);

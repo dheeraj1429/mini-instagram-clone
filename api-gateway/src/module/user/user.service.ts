@@ -23,16 +23,13 @@ export class UserService {
           createAccountDto,
         ),
       );
-
       if (response.isError) {
         return response;
       }
-
       const successResponse = response as Exclude<
         CreateAccountResponseInterface,
         { isError: true }
       >;
-
       return successResponse;
     } catch (error) {
       console.error('Error in createAccount:', error);

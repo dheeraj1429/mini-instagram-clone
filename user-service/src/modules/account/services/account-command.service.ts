@@ -21,43 +21,43 @@ export class AccountCommandService {
   async createAccount(
     createAccountDto: CreateAccountDto,
   ): Promise<CreateAccountResponseInterface> {
-    this.authService.send(AUTH_EVENTS.GENERATE_TOKEN, {});
+    this.authService.emit(AUTH_EVENTS.GENERATE_TOKEN, {});
     return {};
 
-    const { name, email, password, confirmPassword } = createAccountDto;
+    // const { name, email, password, confirmPassword } = createAccountDto;
 
-    if (password != confirmPassword) {
-      throw new RpcException(
-        new BadRequestException('Password and confirm password do not match'),
-      );
-    }
+    // if (password != confirmPassword) {
+    //   throw new RpcException(
+    //     new BadRequestException('Password and confirm password do not match'),
+    //   );
+    // }
 
-    const isEmailAlreadyExist = await this.accountCommandRepository.findOne(
-      { email },
-      { email: 1 },
-    );
+    // const isEmailAlreadyExist = await this.accountCommandRepository.findOne(
+    //   { email },
+    //   { email: 1 },
+    // );
 
-    if (isEmailAlreadyExist) {
-      throw new RpcException(new ConflictException('Email already exists'));
-    }
+    // if (isEmailAlreadyExist) {
+    //   throw new RpcException(new ConflictException('Email already exists'));
+    // }
 
-    const hashPassword = await hash(password, 10);
+    // const hashPassword = await hash(password, 10);
 
-    const user = await this.accountCommandRepository.create({
-      email,
-      name,
-      password: hashPassword,
-    });
+    // const user = await this.accountCommandRepository.create({
+    //   email,
+    //   name,
+    //   password: hashPassword,
+    // });
 
-    return {
-      userId: String(user._id),
-      name,
-      email,
-      createdAt: user.createdAt,
-      updatedAt: user.updatedAt,
-      accessToken: 'abc',
-      refreshToken: 'abc',
-      isError: false,
-    };
+    // return {
+    //   userId: String(user._id),
+    //   name,
+    //   email,
+    //   createdAt: user.createdAt,
+    //   updatedAt: user.updatedAt,
+    //   accessToken: 'abc',
+    //   refreshToken: 'abc',
+    //   isError: false,
+    // };
   }
 }

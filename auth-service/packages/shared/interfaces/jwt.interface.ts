@@ -2,7 +2,7 @@ export interface JwtConfigInterface {
   secret: string;
   expiresIn: number | string;
 }
-export interface UserTokenPayloadInterface {
+export interface BaseAuthPayload {
   _id: string;
 }
 

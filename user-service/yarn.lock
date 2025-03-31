@@ -3754,10 +3754,10 @@ mimic-fn@^2.1.0:
   resolved "https://registry.yarnpkg.com/mimic-fn/-/mimic-fn-2.1.0.tgz#7ed2c2ccccaf84d3ffcb7a69b57711fc2083401b"
   integrity sha512-OqbOk5oEQeAZ8WXWydlu9HJjz9WVdEIvamMCcXmuqUYjTknH/sqsWvhQ3vgwKFRR1HpjvNBKQ37nbJgYzGqGcg==
 
-mini-instagram-auth-service-package@^1.0.1:
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/mini-instagram-auth-service-package/-/mini-instagram-auth-service-package-1.0.1.tgz#e122dd56d4c6aa6dd0f0e10aa638afe810d14a0f"
-  integrity sha512-KDYonnrTVm7giqifFwCiZRz+BUAOgQJWJzSTlG1/qllOt2jsLQ5sDclceoBkJU38IIxqFccoCyIrx+J05RBurg==
+mini-instagram-auth-service-package@^1.0.2:
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/mini-instagram-auth-service-package/-/mini-instagram-auth-service-package-1.0.2.tgz#b6d5d32e66f4f12f85f6d27e154882e329f4d690"
+  integrity sha512-BgVMGmDvsBoDvLeLtDMemKavLLLhMLfA1y6akZuK56l/LAyDU4hc4ojT+9SHhIUI4JIBR1RglgRI34XEASi4pQ==
 
 mini-instagram-packages@^0.0.1:
   version "0.0.1"

@@ -6,7 +6,7 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { JwtService as NestJwtService } from '@nestjs/jwt';
 import { Request } from 'express';
-import { JwtConfigInterface, UserTokenPayloadInterface } from 'packages';
+import { JwtConfigInterface, BaseAuthPayload } from 'packages';
 
 @Injectable()
 export class JwtService {
@@ -15,7 +15,7 @@ export class JwtService {
     protected readonly configService: ConfigService,
   ) {}
 
-  async generateToken<T extends UserTokenPayloadInterface>(
+  async generateToken<T extends BaseAuthPayload>(
     payload: T,
     config: JwtConfigInterface,
   ): Promise<string> {
@@ -34,15 +34,11 @@ export class JwtService {
     return token[1];
   }
 
-  async validate(
-    token: string,
-    secret: string,
-  ): Promise<UserTokenPayloadInterface> {
+  async validate(token: string, secret: string): Promise<BaseAuthPayload> {
     try {
-      const tokenPayload =
-        this.nestJwtService.verify<UserTokenPayloadInterface>(token, {
-          secret,
-        });
+      const tokenPayload = this.nestJwtService.verify<BaseAuthPayload>(token, {
+        secret,
+      });
       if (!tokenPayload) throw new ForbiddenException('Token expire');
       return tokenPayload;
     } catch (err) {
@@ -52,7 +48,7 @@ export class JwtService {
 
   async decode(
     token: string,
-  ): Promise<UserTokenPayloadInterface & { iat: number; exp: number }> {
+  ): Promise<BaseAuthPayload & { iat: number; exp: number }> {
     try {
       return this.nestJwtService.decode(token);
     } catch (err) {

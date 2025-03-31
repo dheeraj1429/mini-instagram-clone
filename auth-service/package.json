@@ -7,7 +7,7 @@
   "license": "UNLICENSED",
   "scripts": {
     "build": "cd ./packages && yarn build && cd .. && nest build",
-    "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
+    "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\" \"libs/**/*.ts\"",
     "start": "nest start",
     "start:dev": "cd ./packages && yarn build && cd .. && nest start --watch",
     "start:debug": "nest start --debug --watch",
@@ -26,6 +26,8 @@
     "@nestjs/jwt": "^11.0.0",
     "@nestjs/microservices": "^11.0.12",
     "@nestjs/platform-express": "^10.0.0",
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.14.1",
     "joi": "^17.13.3",
     "reflect-metadata": "^0.2.0",
     "rxjs": "^7.8.1"
@@ -59,7 +61,7 @@
       "json",
       "ts"
     ],
-    "rootDir": "src",
+    "rootDir": ".",
     "testRegex": ".*\\.spec\\.ts$",
     "transform": {
       "^.+\\.(t|j)s$": "ts-jest"
@@ -67,7 +69,14 @@
     "collectCoverageFrom": [
       "**/*.(t|j)s"
     ],
-    "coverageDirectory": "../coverage",
-    "testEnvironment": "node"
+    "coverageDirectory": "./coverage",
+    "testEnvironment": "node",
+    "roots": [
+      "<rootDir>/src/",
+      "<rootDir>/libs/"
+    ],
+    "moduleNameMapper": {
+      "^@app/common(|/.*)$": "<rootDir>/libs/common/src/$1"
+    }
   }
 }
