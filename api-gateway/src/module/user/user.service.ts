@@ -33,7 +33,7 @@ export class UserService {
         { isError: true }
       >;
 
-      console.log(successResponse);
+      return successResponse;
     } catch (error) {
       console.error('Error in createAccount:', error);
       throw error;

@@ -3,7 +3,7 @@ import {
   ExceptionFilter,
   BadRequestException as NestBadRequestException,
 } from '@nestjs/common';
-import { BaseExceptionInterface, ERROR_CODES } from 'packages';
+import { BaseExceptionInterface } from 'packages';
 import { Observable, of } from 'rxjs';
 import { BadRequestExceptionInterface } from './exception';
 
@@ -17,7 +17,6 @@ export class BadRequestException
     const response = exception.getResponse() as BadRequestExceptionInterface;
     return of({
       ...response,
-      type: ERROR_CODES.BAD_REQUEST_EXCEPTION,
       isError: true,
     });
   }

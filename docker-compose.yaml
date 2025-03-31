@@ -1,4 +1,16 @@
 services:
+  mongo:
+    image: mongo:6.0
+    container_name: mongodb_container
+    restart: always
+    ports:
+      - "27017:27017"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=password
+    volumes:
+      - mongo_data:/data/db
+
   user-service:
     build:
       context: ./user-service
@@ -13,6 +25,7 @@ services:
       - PORT=3001
       - HOST=0.0.0.0
       - NODE_ENV=development
+      - MONGODB_URI=mongodb://admin:password@mongo:27017/users?authSource=admin
 
   api-gateway:
     build:
@@ -30,3 +43,6 @@ services:
       - USER_SERVICE_PORT=3001
     depends_on:
       - user-service
+
+volumes:
+  mongo_data:
