@@ -19,6 +19,7 @@ services:
     volumes:
       - ./user-service/src:/usr/src/app/src
       - ./user-service/libs:/usr/src/app/libs
+      - ./user-service/packages:/usr/src/app/packages
     ports:
       - 3001:3001
     environment:

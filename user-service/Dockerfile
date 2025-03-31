@@ -14,4 +14,5 @@ FROM base AS production
 ENV NODE_ENV=production
 RUN npm run build
 RUN rm -rf ./src
+RUN rm -rf ./packages/shared
 CMD [ "node", "dist/main" ]
