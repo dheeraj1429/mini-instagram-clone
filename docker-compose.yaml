@@ -27,6 +27,8 @@ services:
       - HOST=0.0.0.0
       - NODE_ENV=development
       - MONGODB_URI=mongodb://admin:password@mongo:27017/users?authSource=admin
+      - AUTH_SERVICE_PORT=3002
+      - AUTH_SERVICE_HOST=0.0.0.0
 
   auth-service:
     build:

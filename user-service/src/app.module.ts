@@ -16,6 +16,8 @@ import { DatabaseModule } from 'mini-instagram-packages';
         HOST: Joi.string().required(),
         NODE_ENV: Joi.string().required(),
         MONGODB_URI: Joi.string().required(),
+        AUTH_SERVICE_HOST: Joi.string().required(),
+        AUTH_SERVICE_PORT: Joi.number().required(),
       }),
     }),
     AccountModule,

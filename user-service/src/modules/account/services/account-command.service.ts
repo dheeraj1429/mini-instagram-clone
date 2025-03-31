@@ -1,23 +1,29 @@
 import {
   BadRequestException,
   ConflictException,
+  Inject,
   Injectable,
 } from '@nestjs/common';
-import { CreateAccountDto } from '../dto';
-import { AccountCommandRepository } from '../repository';
-import { RpcException } from '@nestjs/microservices';
+import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { hash } from 'bcryptjs';
 import { CreateAccountResponseInterface } from 'packages/dist';
+import { CreateAccountDto } from '../dto';
+import { AccountCommandRepository } from '../repository';
+import { AUTH_EVENTS } from 'mini-instagram-auth-service-package';
 
 @Injectable()
 export class AccountCommandService {
   constructor(
+    @Inject('AUTH_SERVICE') private readonly authService: ClientProxy,
     private readonly accountCommandRepository: AccountCommandRepository,
   ) {}
 
   async createAccount(
     createAccountDto: CreateAccountDto,
   ): Promise<CreateAccountResponseInterface> {
+    this.authService.send(AUTH_EVENTS.GENERATE_TOKEN, {});
+    return {};
+
     const { name, email, password, confirmPassword } = createAccountDto;
 
     if (password != confirmPassword) {
