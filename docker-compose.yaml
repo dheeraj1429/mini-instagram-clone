@@ -28,6 +28,22 @@ services:
       - NODE_ENV=development
       - MONGODB_URI=mongodb://admin:password@mongo:27017/users?authSource=admin
 
+  auth-service:
+    build:
+      context: ./auth-service
+      dockerfile: Dockerfile
+      target: development
+    volumes:
+      - ./auth-service/src:/usr/src/app/src
+    ports:
+      - 3002:3002
+    environment:
+      - PORT=3002
+      - HOST=0.0.0.0
+      - NODE_ENV=development
+      - ACCESS_TOKEN_SECRET="5fd0bedd-34c4-4775-9b3b-4bfa146d1bda"
+      - REFRESH_TOKEN_SECRET="2a856973-224e-4b6d-9321-75000dba4453"
+
   api-gateway:
     build:
       context: ./api-gateway
@@ -44,6 +60,7 @@ services:
       - USER_SERVICE_PORT=3001
     depends_on:
       - user-service
+      - auth-service
 
 volumes:
   mongo_data:
