@@ -12,7 +12,6 @@ export class JwtController {
 
   @MessagePattern(AUTH_EVENTS.GENERATE_TOKEN)
   async generateToken(generateTokenDto: GenerateTokenDto) {
-    this.logger.log('Generating token');
-    return { done: true };
+    return this.jwtService.generateToken(generateTokenDto);
   }
 }

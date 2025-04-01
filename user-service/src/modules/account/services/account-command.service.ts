@@ -12,6 +12,7 @@ import { AccountCommandRepository } from '../repository';
 import {
   AUTH_EVENTS,
   GenerateTokenRequestInterface,
+  GenerateTokenResponse,
 } from 'mini-instagram-auth-service-package';
 import { firstValueFrom } from 'rxjs';
 
@@ -26,21 +27,6 @@ export class AccountCommandService {
     createAccountDto: CreateAccountDto,
   ): Promise<CreateAccountResponseInterface> {
     try {
-      const accessToken = await firstValueFrom(
-        this.authService.send<any, GenerateTokenRequestInterface<unknown>>(
-          AUTH_EVENTS.GENERATE_TOKEN,
-          {
-            type: 'access',
-            payload: undefined,
-            expiresIn: '5m',
-          },
-        ),
-      );
-
-      if (accessToken.isError) {
-        return accessToken;
-      }
-
       const { name, email, password, confirmPassword } = createAccountDto;
 
       if (password != confirmPassword) {
@@ -66,14 +52,58 @@ export class AccountCommandService {
         password: hashPassword,
       });
 
+      const tokenPayload = {
+        _id: String(user._id),
+      };
+
+      const generateAccessToken = await firstValueFrom(
+        this.authService.send<
+          GenerateTokenResponse,
+          GenerateTokenRequestInterface<unknown>
+        >(AUTH_EVENTS.GENERATE_TOKEN, {
+          type: 'access',
+          payload: tokenPayload,
+          expiresIn: '5m',
+        }),
+      );
+
+      if (generateAccessToken.isError) {
+        return generateAccessToken;
+      }
+
+      const generateRefreshToken = await firstValueFrom(
+        this.authService.send<
+          GenerateTokenResponse,
+          GenerateTokenRequestInterface<unknown>
+        >(AUTH_EVENTS.GENERATE_TOKEN, {
+          type: 'access',
+          payload: tokenPayload,
+          expiresIn: '5m',
+        }),
+      );
+
+      if (generateRefreshToken.isError) {
+        return generateRefreshToken;
+      }
+
+      const successAccessTokenResponse = generateAccessToken as Exclude<
+        GenerateTokenResponse,
+        { isError: true }
+      >;
+
+      const successRefreshTokenResponse = generateAccessToken as Exclude<
+        GenerateTokenResponse,
+        { isError: true }
+      >;
+
       return {
         userId: String(user._id),
         name,
         email,
         createdAt: user.createdAt,
         updatedAt: user.updatedAt,
-        accessToken: 'abc',
-        refreshToken: 'abc',
+        accessToken: successAccessTokenResponse.token,
+        refreshToken: successRefreshTokenResponse.token,
         isError: false,
       };
     } catch (error) {

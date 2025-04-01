@@ -6,23 +6,34 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { JwtService as NestJwtService } from '@nestjs/jwt';
 import { Request } from 'express';
-import { JwtConfigInterface, BaseAuthPayload } from 'packages';
+import { BaseAuthPayload, GenerateTokenResponse, TokenType } from 'packages';
+import { GenerateTokenDto } from './dto';
 
 @Injectable()
 export class JwtService {
   constructor(
-    protected readonly nestJwtService: NestJwtService,
-    protected readonly configService: ConfigService,
+    private readonly nestJwtService: NestJwtService,
+    private readonly configService: ConfigService,
   ) {}
 
-  async generateToken<T extends BaseAuthPayload>(
-    payload: T,
-    config: JwtConfigInterface,
-  ): Promise<string> {
-    return this.nestJwtService.sign(payload, {
-      secret: config.secret,
-      expiresIn: config.expiresIn,
-    });
+  private deriveSecretByTokenType(type: TokenType): string {
+    switch (type) {
+      case 'access':
+        return this.configService.get<string>('ACCESS_TOKEN_SECRET');
+      case 'refresh':
+        return this.configService.get<string>('REFRESH_TOKEN_SECRET');
+    }
+  }
+
+  async generateToken(
+    generateTokenDto: GenerateTokenDto,
+  ): Promise<GenerateTokenResponse> {
+    const { payload, type, expiresIn } = generateTokenDto;
+
+    const secret = this.deriveSecretByTokenType(type);
+    const token = this.nestJwtService.sign(payload, { secret, expiresIn });
+
+    return { token, isError: false };
   }
 
   async getToken(request: Request): Promise<string> {
