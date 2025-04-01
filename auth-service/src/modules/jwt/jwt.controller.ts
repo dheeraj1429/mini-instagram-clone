@@ -2,6 +2,7 @@ import { Controller, Logger } from '@nestjs/common';
 import { JwtService } from './jwt.service';
 import { AUTH_EVENTS } from 'packages';
 import { MessagePattern } from '@nestjs/microservices';
+import { GenerateTokenDto } from './dto';
 
 @Controller()
 export class JwtController {
@@ -10,7 +11,7 @@ export class JwtController {
   constructor(private readonly jwtService: JwtService) {}
 
   @MessagePattern(AUTH_EVENTS.GENERATE_TOKEN)
-  async generateToken() {
+  async generateToken(generateTokenDto: GenerateTokenDto) {
     this.logger.log('Generating token');
     return { done: true };
   }

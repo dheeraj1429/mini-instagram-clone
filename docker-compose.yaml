@@ -18,6 +18,7 @@ services:
       target: development
     volumes:
       - ./auth-service/src:/usr/src/app/src
+    container_name: auth-service
     ports:
       - 3002:3002
     environment:
@@ -36,6 +37,7 @@ services:
       - ./user-service/src:/usr/src/app/src
       - ./user-service/libs:/usr/src/app/libs
       - ./user-service/packages:/usr/src/app/packages
+    container_name: user-service
     ports:
       - 3001:3001
     environment:
@@ -55,6 +57,7 @@ services:
       target: development
     volumes:
       - ./api-gateway/src:/usr/src/app/src
+    container_name: api-gateway
     ports:
       - 3000:3000
     environment:

@@ -9,7 +9,11 @@ import { hash } from 'bcryptjs';
 import { CreateAccountResponseInterface } from 'packages/dist';
 import { CreateAccountDto } from '../dto';
 import { AccountCommandRepository } from '../repository';
-import { AUTH_EVENTS } from 'mini-instagram-auth-service-package';
+import {
+  AUTH_EVENTS,
+  GenerateTokenRequestInterface,
+} from 'mini-instagram-auth-service-package';
+import { firstValueFrom } from 'rxjs';
 
 @Injectable()
 export class AccountCommandService {
@@ -21,43 +25,60 @@ export class AccountCommandService {
   async createAccount(
     createAccountDto: CreateAccountDto,
   ): Promise<CreateAccountResponseInterface> {
-    this.authService.emit(AUTH_EVENTS.GENERATE_TOKEN, {});
-    return {};
+    try {
+      const accessToken = await firstValueFrom(
+        this.authService.send<any, GenerateTokenRequestInterface<unknown>>(
+          AUTH_EVENTS.GENERATE_TOKEN,
+          {
+            type: 'access',
+            payload: undefined,
+            expiresIn: '5m',
+          },
+        ),
+      );
 
-    // const { name, email, password, confirmPassword } = createAccountDto;
+      if (accessToken.isError) {
+        return accessToken;
+      }
 
-    // if (password != confirmPassword) {
-    //   throw new RpcException(
-    //     new BadRequestException('Password and confirm password do not match'),
-    //   );
-    // }
+      const { name, email, password, confirmPassword } = createAccountDto;
 
-    // const isEmailAlreadyExist = await this.accountCommandRepository.findOne(
-    //   { email },
-    //   { email: 1 },
-    // );
+      if (password != confirmPassword) {
+        throw new RpcException(
+          new BadRequestException('Password and confirm password do not match'),
+        );
+      }
 
-    // if (isEmailAlreadyExist) {
-    //   throw new RpcException(new ConflictException('Email already exists'));
-    // }
+      const isEmailAlreadyExist = await this.accountCommandRepository.findOne(
+        { email },
+        { email: 1 },
+      );
 
-    // const hashPassword = await hash(password, 10);
+      if (isEmailAlreadyExist) {
+        throw new RpcException(new ConflictException('Email already exists'));
+      }
 
-    // const user = await this.accountCommandRepository.create({
-    //   email,
-    //   name,
-    //   password: hashPassword,
-    // });
+      const hashPassword = await hash(password, 10);
 
-    // return {
-    //   userId: String(user._id),
-    //   name,
-    //   email,
-    //   createdAt: user.createdAt,
-    //   updatedAt: user.updatedAt,
-    //   accessToken: 'abc',
-    //   refreshToken: 'abc',
-    //   isError: false,
-    // };
+      const user = await this.accountCommandRepository.create({
+        email,
+        name,
+        password: hashPassword,
+      });
+
+      return {
+        userId: String(user._id),
+        name,
+        email,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
+        accessToken: 'abc',
+        refreshToken: 'abc',
+        isError: false,
+      };
+    } catch (error) {
+      console.error('Error in createAccount:', error);
+      throw error;
+    }
   }
 }
