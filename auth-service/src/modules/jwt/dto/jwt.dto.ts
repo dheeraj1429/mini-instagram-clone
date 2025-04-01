@@ -5,7 +5,11 @@ import {
   IsString,
   ValidateIf,
 } from 'class-validator';
-import { GenerateTokenRequestInterface, TokenType } from 'packages';
+import {
+  GenerateTokenRequestInterface,
+  TokenType,
+  ValidateTokenRequestInterface,
+} from 'packages';
 
 export class GenerateTokenDto
   implements GenerateTokenRequestInterface<unknown>
@@ -27,4 +31,15 @@ export class GenerateTokenDto
   )
   @IsNotEmpty()
   expiresIn: string | number;
+}
+
+export class ValidateTokenDto implements ValidateTokenRequestInterface {
+  @IsIn(['access', 'refresh'], {
+    message: 'type must be either "access" or "refresh"',
+  })
+  type: TokenType;
+
+  @IsString()
+  @IsNotEmpty()
+  token: string;
 }

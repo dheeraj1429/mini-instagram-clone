@@ -8,6 +8,7 @@ import { JwtService as NestJwtService } from '@nestjs/jwt';
 import { Request } from 'express';
 import { BaseAuthPayload, GenerateTokenResponse, TokenType } from 'packages';
 import { GenerateTokenDto } from './dto';
+import { RpcException } from '@nestjs/microservices';
 
 @Injectable()
 export class JwtService {
@@ -16,7 +17,7 @@ export class JwtService {
     private readonly configService: ConfigService,
   ) {}
 
-  private deriveSecretByTokenType(type: TokenType): string {
+  deriveSecretByTokenType(type: TokenType): string {
     switch (type) {
       case 'access':
         return this.configService.get<string>('ACCESS_TOKEN_SECRET');
@@ -50,10 +51,12 @@ export class JwtService {
       const tokenPayload = this.nestJwtService.verify<BaseAuthPayload>(token, {
         secret,
       });
-      if (!tokenPayload) throw new ForbiddenException('Token expire');
+      if (!tokenPayload) {
+        throw new RpcException(new ForbiddenException('Token expire'));
+      }
       return tokenPayload;
     } catch (err) {
-      throw new ForbiddenException('Invalid token');
+      throw new RpcException(new ForbiddenException('Invalid token'));
     }
   }
 

@@ -9,3 +9,8 @@ export interface GenerateTokenRequestInterface<T>
   type: TokenType;
   payload: BaseAuthPayload & T;
 }
+
+export interface ValidateTokenRequestInterface {
+  type: TokenType;
+  token: string;
+}
