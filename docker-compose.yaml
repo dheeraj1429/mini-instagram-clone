@@ -1,73 +1,85 @@
 services:
-  mongo:
-    image: mongo:6.0
-    container_name: mongodb_container
-    restart: always
-    ports:
-      - "27017:27017"
-    environment:
-      - MONGO_INITDB_ROOT_USERNAME=admin
-      - MONGO_INITDB_ROOT_PASSWORD=password
-    volumes:
-      - mongo_data:/data/db
+  # mongo:
+  #   image: mongo:6.0
+  #   container_name: mongodb_container
+  #   restart: always
+  #   ports:
+  #     - "27017:27017"
+  #   environment:
+  #     - MONGO_INITDB_ROOT_USERNAME=admin
+  #     - MONGO_INITDB_ROOT_PASSWORD=password
+  #   volumes:
+  #     - mongo_data:/data/db
 
-  auth-service:
+  upload-service:
     build:
-      context: ./auth-service
+      context: ./upload-service
       dockerfile: Dockerfile
       target: development
     volumes:
-      - ./auth-service/src:/usr/src/app/src
-    container_name: auth-service
+      - ./upload-service/src:/usr/src/app/src
     ports:
-      - 3002:3002
+      - 3003:3003
     environment:
-      - PORT=3002
-      - HOST=0.0.0.0
+      - PORT=3003
       - NODE_ENV=development
-      - ACCESS_TOKEN_SECRET="5fd0bedd-34c4-4775-9b3b-4bfa146d1bda"
-      - REFRESH_TOKEN_SECRET="2a856973-224e-4b6d-9321-75000dba4453"
 
-  user-service:
-    build:
-      context: ./user-service
-      dockerfile: Dockerfile
-      target: development
-    volumes:
-      - ./user-service/src:/usr/src/app/src
-      - ./user-service/libs:/usr/src/app/libs
-      - ./user-service/packages:/usr/src/app/packages
-    container_name: user-service
-    ports:
-      - 3001:3001
-    environment:
-      - PORT=3001
-      - HOST=0.0.0.0
-      - NODE_ENV=development
-      - MONGODB_URI=mongodb://admin:password@mongo:27017/users?authSource=admin
-      - AUTH_SERVICE_PORT=3002
-      - AUTH_SERVICE_HOST=auth-service
-    depends_on:
-      - auth-service
+  # auth-service:
+  #   build:
+  #     context: ./auth-service
+  #     dockerfile: Dockerfile
+  #     target: development
+  #   volumes:
+  #     - ./auth-service/src:/usr/src/app/src
+  #   container_name: auth-service
+  #   ports:
+  #     - 3002:3002
+  #   environment:
+  #     - PORT=3002
+  #     - HOST=0.0.0.0
+  #     - NODE_ENV=development
+  #     - ACCESS_TOKEN_SECRET="5fd0bedd-34c4-4775-9b3b-4bfa146d1bda"
+  #     - REFRESH_TOKEN_SECRET="2a856973-224e-4b6d-9321-75000dba4453"
 
-  api-gateway:
-    build:
-      context: ./api-gateway
-      dockerfile: Dockerfile
-      target: development
-    volumes:
-      - ./api-gateway/src:/usr/src/app/src
-    container_name: api-gateway
-    ports:
-      - 3000:3000
-    environment:
-      - PORT=3000
-      - NODE_ENV=development
-      - USER_SERVICE_HOST=user-service
-      - USER_SERVICE_PORT=3001
-    depends_on:
-      - user-service
-      - auth-service
+  # user-service:
+  #   build:
+  #     context: ./user-service
+  #     dockerfile: Dockerfile
+  #     target: development
+  #   volumes:
+  #     - ./user-service/src:/usr/src/app/src
+  #     - ./user-service/libs:/usr/src/app/libs
+  #     - ./user-service/packages:/usr/src/app/packages
+  #   container_name: user-service
+  #   ports:
+  #     - 3001:3001
+  #   environment:
+  #     - PORT=3001
+  #     - HOST=0.0.0.0
+  #     - NODE_ENV=development
+  #     - MONGODB_URI=mongodb://admin:password@mongo:27017/users?authSource=admin
+  #     - AUTH_SERVICE_PORT=3002
+  #     - AUTH_SERVICE_HOST=auth-service
+  #   depends_on:
+  #     - auth-service
 
-volumes:
-  mongo_data:
+  # api-gateway:
+  #   build:
+  #     context: ./api-gateway
+  #     dockerfile: Dockerfile
+  #     target: development
+  #   volumes:
+  #     - ./api-gateway/src:/usr/src/app/src
+  #   container_name: api-gateway
+  #   ports:
+  #     - 3000:3000
+  #   environment:
+  #     - PORT=3000
+  #     - NODE_ENV=development
+  #     - USER_SERVICE_HOST=user-service
+  #     - USER_SERVICE_PORT=3001
+  #   depends_on:
+  #     - user-service
+  #     - auth-service
+# volumes:
+#   mongo_data:
