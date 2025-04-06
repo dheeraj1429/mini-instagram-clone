@@ -1,12 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { google } from 'googleapis';
+import { drive_v3, google } from 'googleapis';
 import { Readable } from 'stream';
-import {
-  adjectives,
-  animals,
-  colors,
-  uniqueNamesGenerator,
-} from 'unique-names-generator';
 import { v4 as uuidv4 } from 'uuid';
 import { UploadProvider } from '../upload/interfaces/upload-provider.interface';
 import * as config from './config/google-drive-config.json';
@@ -15,14 +9,6 @@ import * as config from './config/google-drive-config.json';
 export class GoogleDriveService implements UploadProvider {
   private readonly SCOPE = ['https://www.googleapis.com/auth/drive'];
   private readonly parents = ['1TbgA2uoJJijESVxlYaMNvNO2kS9LeRtO'];
-
-  private readonly randomNameConfig = {
-    dictionaries: [adjectives, colors, animals],
-    separator: '-',
-    seed: 120498,
-  };
-
-  constructor() {}
 
   private async authorize() {
     const jwtClient = new google.auth.JWT(
@@ -67,17 +53,34 @@ export class GoogleDriveService implements UploadProvider {
     return fileUrl;
   }
 
+  private async createFolder(driveService: drive_v3.Drive, folderName: string) {
+    try {
+      const fileMetaData = {
+        name: folderName,
+        mimeType: 'application/vnd.google-apps.folder',
+        parents: this.parents,
+      };
+      const createFolderResponse = await driveService.files.create({
+        fields: 'id',
+        requestBody: fileMetaData,
+      });
+      return createFolderResponse;
+    } catch (err) {
+      throw err;
+    }
+  }
+
   async uploadFile(file: Express.Multer.File): Promise<string> {
     try {
       const driveService = await this.getDriveService();
 
-      const fileName =
-        file.fieldname ?? uniqueNamesGenerator(this.randomNameConfig);
+      const fileName = uuidv4();
+      const createFolder = await this.createFolder(driveService, fileName);
 
       const response = await driveService.files.create({
         requestBody: {
-          name: `${fileName}-${uuidv4()}`,
-          parents: this.parents,
+          name: fileName,
+          parents: [createFolder.data.id],
         },
         media: {
           mimeType: file.mimetype,
