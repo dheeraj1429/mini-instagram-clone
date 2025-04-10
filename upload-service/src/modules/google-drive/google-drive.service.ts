@@ -2,11 +2,10 @@ import { Injectable } from '@nestjs/common';
 import { drive_v3, google } from 'googleapis';
 import { Readable } from 'stream';
 import { v4 as uuidv4 } from 'uuid';
-import { UploadProvider } from '../upload/interfaces/upload-provider.interface';
 import * as config from './config/google-drive-config.json';
 
 @Injectable()
-export class GoogleDriveService implements UploadProvider {
+export class GoogleDriveService {
   private readonly SCOPE = ['https://www.googleapis.com/auth/drive'];
   private readonly parents = ['1TbgA2uoJJijESVxlYaMNvNO2kS9LeRtO'];
 

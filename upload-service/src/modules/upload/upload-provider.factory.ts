@@ -1,15 +1,18 @@
 import { Injectable } from '@nestjs/common';
-import { GoogleDriveService } from '../google-drive';
-import { UploadProvider } from './interfaces/upload-provider.interface';
+import { CustomStorageService } from '../custom-storage';
+import {
+  UploadProvider,
+  UploadProviderType,
+} from './interfaces/upload-provider.interface';
 
 @Injectable()
 export class UploadProviderFactory {
-  constructor(private googleDrive: GoogleDriveService) {}
+  constructor(private readonly customStorage: CustomStorageService) {}
 
-  getProvider(provider: 'googleDrive'): UploadProvider {
+  getProvider(provider: UploadProviderType = 'customStorage'): UploadProvider {
     switch (provider) {
-      case 'googleDrive':
-        return this.googleDrive;
+      case 'customStorage':
+        return this.customStorage;
       default:
         throw new Error('Unsupported provider');
     }

@@ -1,4 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import axios from 'axios';
 import { spawn } from 'child_process';
 import * as fs from 'fs';
@@ -6,11 +7,13 @@ import { promises as fsPromises } from 'fs';
 import * as path from 'path';
 import { pipeline } from 'stream';
 import { promisify } from 'util';
-import { v4 as uuidv4 } from 'uuid';
+import { CreateVideoSegmentsDto } from './dto';
 
 @Injectable()
 export class TranscodingService {
   private readonly logger = new Logger(TranscodingService.name);
+
+  constructor(private readonly configService: ConfigService) {}
 
   private async createDirectory(dir: string) {
     try {
@@ -24,23 +27,16 @@ export class TranscodingService {
   private async downloadFile(
     fileUrl: string,
     filePath: string,
+    fileName: string,
   ): Promise<string> {
     try {
+      const downloadFileUrl = `${this.configService.get<string>('CUSTOM_STORAGE_URL')}${fileUrl}`;
+
       const response = await axios({
         method: 'get',
-        url: fileUrl,
+        url: downloadFileUrl,
         responseType: 'stream',
       });
-
-      const disposition = response.headers['content-disposition'];
-      let fileName = 'unknown-file';
-
-      if (disposition && disposition.includes('filename=')) {
-        const match = disposition.match(/filename="(.+?)"/);
-        if (match && match[1]) {
-          fileName = match[1];
-        }
-      }
 
       const finalFilePath = path.join(filePath, fileName);
 
@@ -85,20 +81,18 @@ export class TranscodingService {
     });
   }
 
-  async transcoding(data: any) {
-    const UPLOADED_VIDEO_BUNDLE_ID = uuidv4();
-    const outputFilePath = `/usr/src/outputs/${UPLOADED_VIDEO_BUNDLE_ID}`;
-
+  async createVideoSegments(createVideoSegments: CreateVideoSegmentsDto) {
+    const outputFilePath = `/usr/src/outputs/${createVideoSegments.folder}`;
     await this.createDirectory(outputFilePath);
 
     const downloadedFilePath = await this.downloadFile(
-      data.postVideoUrl,
+      createVideoSegments.path,
       outputFilePath,
+      createVideoSegments.filename,
     );
 
     const segmentsPath = path.join(outputFilePath, 'segments');
     await this.createDirectory(segmentsPath);
-
     this.runCommand('ffmpeg', [
       '-i',
       downloadedFilePath,

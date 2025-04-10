@@ -1,0 +1,12 @@
+{
+  "name": "mini-instagram-video-process-service-package",
+  "version": "1.0.1",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "nest build"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": ""
+}
