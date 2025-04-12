@@ -1,3 +1,4 @@
+require("dotenv").config();
 const express = require("express");
 const multer = require("multer");
 const path = require("path");
@@ -25,7 +26,7 @@ const storage = multer.diskStorage({
     cb(null, fullPath);
   },
   filename: (_, file, cb) => {
-    cb(null, `${Date.now()}-${file.originalname}`);
+    cb(null, file.originalname);
   },
 });
 

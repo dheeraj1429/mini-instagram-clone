@@ -1,59 +1,18 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import axios from 'axios';
 import { spawn } from 'child_process';
-import * as fs from 'fs';
-import { promises as fsPromises } from 'fs';
 import * as path from 'path';
-import { pipeline } from 'stream';
-import { promisify } from 'util';
-import { CreateVideoSegmentsDto } from './dto';
+import { FileTransferService } from '../file-transfer';
+import { CreateVideoSegmentsDto, RunCommandDto } from './dto';
 
 @Injectable()
 export class TranscodingService {
   private readonly logger = new Logger(TranscodingService.name);
 
-  constructor(private readonly configService: ConfigService) {}
+  constructor(private readonly fileTransferService: FileTransferService) {}
 
-  private async createDirectory(dir: string) {
-    try {
-      await fsPromises.mkdir(dir, { recursive: true });
-      this.logger.log(`Directory created: ${dir}`);
-    } catch (error) {
-      throw error;
-    }
-  }
+  private async runCommand(runCommandDto: RunCommandDto): Promise<void> {
+    const { cmd, args } = runCommandDto;
 
-  private async downloadFile(
-    fileUrl: string,
-    filePath: string,
-    fileName: string,
-  ): Promise<string> {
-    try {
-      const downloadFileUrl = `${this.configService.get<string>('CUSTOM_STORAGE_URL')}${fileUrl}`;
-
-      const response = await axios({
-        method: 'get',
-        url: downloadFileUrl,
-        responseType: 'stream',
-      });
-
-      const finalFilePath = path.join(filePath, fileName);
-
-      await promisify(pipeline)(
-        response.data,
-        fs.createWriteStream(finalFilePath),
-      );
-
-      this.logger.log(`Download complete: ${finalFilePath}`);
-      return finalFilePath;
-    } catch (error) {
-      this.logger.error(`Download failed: ${error.message}`);
-      throw error;
-    }
-  }
-
-  private async runCommand(cmd: string, args: string[]): Promise<void> {
     return new Promise((resolve, reject) => {
       const process = spawn(cmd, args);
 
@@ -82,33 +41,57 @@ export class TranscodingService {
   }
 
   async createVideoSegments(createVideoSegments: CreateVideoSegmentsDto) {
-    const outputFilePath = `/usr/src/outputs/${createVideoSegments.folder}`;
-    await this.createDirectory(outputFilePath);
+    try {
+      const outputFilePath = `/usr/src/outputs/${createVideoSegments.folder}`;
+      await this.fileTransferService.createDirectory(outputFilePath);
 
-    const downloadedFilePath = await this.downloadFile(
-      createVideoSegments.path,
-      outputFilePath,
-      createVideoSegments.filename,
-    );
+      const downloadedFilePath = await this.fileTransferService.downloadFile({
+        fileUrl: createVideoSegments.path,
+        filePath: outputFilePath,
+        fileName: createVideoSegments.filename,
+      });
 
-    const segmentsPath = path.join(outputFilePath, 'segments');
-    await this.createDirectory(segmentsPath);
-    this.runCommand('ffmpeg', [
-      '-i',
-      downloadedFilePath,
-      '-codec:v',
-      'libx264',
-      '-codec:a',
-      'aac',
-      '-hls_time',
-      '10',
-      '-hls_playlist_type',
-      'vod',
-      `-hls_segment_filename`,
-      path.join(segmentsPath, 'segment%03d.ts'),
-      '-start_number',
-      '0',
-      path.join(segmentsPath, 'index.m3u8'),
-    ]);
+      const segmentsPath = path.join(outputFilePath, 'segments');
+
+      await this.fileTransferService.createDirectory(segmentsPath);
+      await this.runCommand({
+        cmd: 'ffmpeg',
+        args: [
+          '-i',
+          downloadedFilePath,
+          '-codec:v',
+          'libx264',
+          '-codec:a',
+          'aac',
+          '-hls_time',
+          '10',
+          '-hls_playlist_type',
+          'vod',
+          `-hls_segment_filename`,
+          path.join(segmentsPath, 'segment%03d.ts'),
+          '-start_number',
+          '0',
+          path.join(segmentsPath, 'index.m3u8'),
+        ],
+      });
+
+      const filesPath = await this.fileTransferService.getAllFiles({
+        folderPath: segmentsPath,
+      });
+
+      await Promise.all(
+        filesPath.map((path) => {
+          return this.fileTransferService.uploadFile({
+            filePath: path,
+            suffixPath: `folderPath=${createVideoSegments.folder}`,
+          });
+        }),
+      );
+
+      await this.fileTransferService.removeDir(outputFilePath);
+    } catch (err) {
+      this.logger.error(err);
+      throw err;
+    }
   }
 }
