@@ -1,4 +1,15 @@
 services:
+  storage-service:
+    build:
+      context: ./storage-service
+      dockerfile: Dockerfile
+    volumes:
+      - ./storage-service/src:/usr/src/app/src
+    ports:
+      - 3005:3005
+    environment:
+      - PORT=3005
+
   mongo:
     image: mongo:6.0
     container_name: mongodb_container
@@ -10,17 +21,6 @@ services:
       - MONGO_INITDB_ROOT_PASSWORD=password
     volumes:
       - mongo_data:/data/db
-
-  storage-service:
-    build:
-      context: ./storage-service
-      dockerfile: Dockerfile
-    volumes:
-      - ./storage-service/src:/usr/src/app/src
-    ports:
-      - 3005:3005
-    environment:
-      - PORT=3005
 
   video-process-service:
     build:
